@@ -1,0 +1,33 @@
+{
+  "variables": {
+    "version": "",
+    "access_token": ""
+  },
+  "builders": [
+    {
+      "communicator": "ssh",
+      "source_path": "01-boxes/centos8-gui.box",
+      "provider": "virtualbox",
+      "add_force": true,
+      "output_dir": "01-boxes/centos8-gui",
+      "box_name": "packer/centos8-gui",
+      "teardown_method": "destroy",
+      "type": "vagrant"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant-cloud",
+      "box_tag": "bprice/centos8-gui",
+      "version": "{{user `version`}}",
+      "access_token": "{{user `access_token`}}"
+    },
+    {
+      "type": "shell-local",
+      "inline": [
+        "vagrant box remove packer/centos8-gui",
+        "rm -r 01-boxes/centos8-gui"
+      ]
+    }
+  ]
+}

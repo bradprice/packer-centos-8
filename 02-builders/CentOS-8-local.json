@@ -1,0 +1,81 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<wait><up><wait><tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/rhel-8-ks.cfg<enter><wait>"
+      ],
+      "floppy_files": [],
+      "boot_wait": "5s",
+      "disk_size": "102400",
+      "guest_additions_mode": "upload",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_os_type": "RedHat_64",
+      "http_directory": "03-kickstart/",
+      "iso_urls": [
+        "04-ISOs/CentOS-8-x86_64-1905-dvd1.iso",
+        "http://mirror.vtti.vt.edu/centos/8.0.1905/isos/x86_64/CentOS-8-x86_64-1905-dvd1.iso"
+      ],
+      "iso_checksum_url": "http://mirror.vtti.vt.edu/centos/8.0.1905/isos/x86_64/CHECKSUM",
+      "iso_checksum_type": "sha256",
+      "output_directory": "01-boxes/vbox-centos-8",
+      "shutdown_command": "echo 'vagrant' | sudo -S /sbin/halt -h -p",
+      "shutdown_timeout": "10m",
+      "post_shutdown_delay": "15s",
+      "communicator": "ssh",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": "22",
+      "ssh_wait_timeout": "10000s",
+      "headless": "true",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "packer-centos-8",
+      "vboxmanage": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "2048"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "2"
+        ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "expect_disconnect": "true",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E '{{.Path}}'",
+      "remote_folder": "/var/tmp",
+      "script": "05-provisioning/scripts/ansible-install.sh"
+    },
+    {
+      "type": "ansible-local",
+      "galaxy_file": "05-provisioning/ansible/requirements.yml",
+      "playbook_file": "05-provisioning/ansible/provision.yml"
+    },
+    {
+      "type": "shell",
+      "expect_disconnect": "true",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E '{{.Path}}'",
+      "remote_folder": "/var/tmp",
+      "pause_before": "2m",
+      "inline": [ 
+        "echo 'Rebooting'",
+        "shutdown -r now" 
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": "01-boxes/centos8.box",
+      "compression_level": "9"
+    }
+  ]
+}

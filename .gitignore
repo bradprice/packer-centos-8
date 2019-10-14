@@ -1,0 +1,6 @@
+01-boxes/*.box
+01-boxes/centos8/
+01-boxes/centos8-gui/
+02-builders/vars.json
+04-ISOs/*.iso
+packer_cache/

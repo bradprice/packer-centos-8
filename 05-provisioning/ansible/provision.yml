@@ -1,0 +1,7 @@
+--- # Configure Linux VirtualBox VMs
+  - hosts: localhost
+    become: true
+    
+    roles:
+      - packer-provisioning-role
+    
